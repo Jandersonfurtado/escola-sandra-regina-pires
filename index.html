@@ -15,8 +15,8 @@
 
 body{
     background:linear-gradient(90deg,#0047AB,#32CD32);
+    min-height:100vh;
 }
-
 header{
     background:linear-gradient(90deg,#0047AB,#32CD32);
     color:white;
@@ -46,18 +46,21 @@ nav a:hover{
     color:#e99709;
 }
 
-.banner{
-    padding: 10px;px 20px;
+
+.area-branca{
+    background:#ffffff;
+    width:100%;
+    margin:0;
+    padding:40px;
     text-align:center;
-    background:rgb(255, 255, 255);
 }
 
-.banner h1{
+.area-branca h1{
     font-size:3rem;
-    color:#021f3c;
+    color:#002855;
 }
 
-.banner p{
+.area-branca p{
     font-size:1.2rem;
     color:#050031;
     margin-top:10px;
@@ -88,27 +91,13 @@ nav a:hover{
 }
 
 footer{
-    background:#f0ecec;
+    background:#ffffff;
     color:rgb(0, 0, 0);
     text-align:center;
     padding:20px;
     margin-top:40px;
 }
 
-.botao{
-    background:#3cea3c;
-    color:rgb(0, 0, 0);
-    padding:12px 25px;
-    border:none;
-    border-radius:5px;
-    font-size:16px;
-    cursor:pointer;
-    margin-top:20px;
-}
-
-.botao:hover{
-    background-color: #e99709;
-}
 </style>
 </head>
 <body>
@@ -127,13 +116,13 @@ footer{
 
 </nav>
 
-<section class="banner">
-    <img src="logo.jpeg" width="80" height="100">
+<div class="area-branca">
+    <img src="logo.jpeg" width="150" height="150">
+
     <h1>BEM-VINDO À PEI SANDRA REGINA PIRES</h1>
+
     <p>BARÃO DE ANTONINA - URE ITARARÉ</p>
-    
-<button class="botao">Acesse o Instagram</button>
-</section>
+</div>
 
 <section class="section">
 
