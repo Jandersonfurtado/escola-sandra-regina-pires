@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Informações da Escola</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f4f7;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 850px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #0057b8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-left: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🏫 Informações da Escola</h1>
+</header>
+
+<main>
+
+    <label for="telefone">Telefone</label>
+    <input type="text" id="telefone">
+
+    <label for="whatsapp">WhatsApp</label>
+    <input type="text" id="whatsapp">
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email">
+
+    <label for="instagram">Instagram</label>
+    <input type="text" id="instagram">
+
+    <label for="endereco">Endereço</label>
+    <input type="text" id="endereco">
+
+    <label for="inep">Código INEP</label>
+    <input type="text" id="inep">
+
+    <label for="diretora">Diretora</label>
+    <input type="text" id="diretora">
+
+    <label for="viceDiretor">Vice-Diretor</label>
+    <input type="text" id="viceDiretor">
+
+    <label for="coordenadora">Coordenadora</label>
+    <input type="text" id="coordenadora">
+
+    <label for="horario">Horário de funcionamento da secretaria</label>
+    <input type="text" id="horario">
+
+    <label for="informacoesExtras">Informações Extras</label>
+<textarea
+    id="informacoesExtras"
+    rows="6"
+    placeholder="Digite aqui outras informações que deseja mostrar no site..."
+></textarea>
+
+    <button id="salvarInformacoes">
+        SALVAR INFORMAÇÕES
+    </button>
+
+    <a href="admin.html" class="voltar">
+        Voltar
+    </a>
+
+</main>
+<script type="module">
+
+    import { db, auth } from "./firebase-config.js";
+
+    import {
+        doc,
+        getDoc,
+        setDoc
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    import {
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+onAuthStateChanged(auth, function(usuario) {
+
+    if (!usuario) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    carregarInformacoes();
+
+});
+async function carregarInformacoes() {
+
+    try {
+
+        const referencia =
+            doc(db, "configuracoes", "escola");
+
+        const resultado =
+            await getDoc(referencia);
+
+        if (resultado.exists()) {
+
+            const dados = resultado.data();
+
+            document.getElementById("telefone").value =
+                dados.telefone || "";
+
+            document.getElementById("whatsapp").value =
+                dados.whatsapp || "";
+
+            document.getElementById("email").value =
+                dados.email || "";
+
+            document.getElementById("instagram").value =
+                dados.instagram || "";
+
+            document.getElementById("endereco").value =
+                dados.endereco || "";
+
+            document.getElementById("inep").value =
+                dados.inep || "";
+
+            document.getElementById("diretora").value =
+                dados.diretora || "";
+
+            document.getElementById("viceDiretor").value =
+                dados.viceDiretor || "";
+            
+            document.getElementById("coordenadora").value =
+                dados.coordenadora || "";
+            
+            document.getElementById("horario").value =
+                dados.horario || "";
+            
+            document.getElementById("informacoesExtras").value =
+    dados.informacoesExtras || "";
+        }
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar informações:", erro);
+
+    }
+}
+document
+    .getElementById("salvarInformacoes")
+    .addEventListener("click", async function() {
+
+        const telefone =
+            document.getElementById("telefone").value.trim();
+
+        const whatsapp =
+            document.getElementById("whatsapp").value.trim();
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const instagram =
+            document.getElementById("instagram").value.trim();
+
+        const endereco =
+            document.getElementById("endereco").value.trim();
+
+        const inep =
+            document.getElementById("inep").value.trim();
+
+        const diretora =
+            document.getElementById("diretora").value.trim();
+
+        const viceDiretor =
+            document.getElementById("viceDiretor").value.trim();
+
+        const coordenadora =
+            document.getElementById("coordenadora").value.trim();
+
+        const horario =
+            document.getElementById("horario").value.trim();
+        
+        const informacoesExtras =
+    document.getElementById("informacoesExtras").value.trim();
+
+        try {
+
+            await setDoc(
+                doc(db, "configuracoes", "escola"),
+                {
+                    telefone: telefone,
+                    whatsapp: whatsapp,
+                    email: email,
+                    instagram: instagram,
+                    endereco: endereco,
+                    inep: inep,
+                    diretora: diretora,
+                    viceDiretor: viceDiretor,
+                    coordenadora: coordenadora,
+                    horario: horario,
+                    informacoesExtras: informacoesExtras
+
+                }
+            );
+
+            alert("Informações salvas com sucesso!");
+
+        } catch (erro) {
+
+            console.error("Erro ao salvar informações:", erro);
+
+            alert("Não foi possível salvar as informações.");
+
+        }
+
+    });
+</script>
+</body>
+</html>

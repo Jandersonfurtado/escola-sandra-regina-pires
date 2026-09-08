@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gerenciar Notícias</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f2f4f7;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .formulario {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+        }
+
+        .formulario h2 {
+            color: #0047AB;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #0047AB;
+        }
+
+        .botoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button,
+        .voltar {
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .publicar {
+            background-color: #0047AB;
+            color: white;
+        }
+
+        .publicar:hover {
+            background-color: #003580;
+        }
+
+        .voltar {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .mensagem {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #dff5df;
+            color: #176b17;
+            border-radius: 6px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>📰 Gerenciar Notícias</h1>
+
+        <p>Escola Estadual Professora Sandra Regina Pires</p>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="formulario">
+
+            <h2>Adicionar nova notícia</h2>
+
+
+            <label for="titulo">
+                Título da notícia
+            </label>
+
+            <input
+                type="text"
+                id="titulo"
+                placeholder="Digite o título da notícia"
+            >
+
+
+            <label for="texto">
+                Texto da notícia
+            </label>
+
+            <textarea
+                id="texto"
+                placeholder="Digite aqui o conteúdo da notícia"
+            ></textarea>
+
+
+            <label for="imagem">
+                Imagem da notícia
+            </label>
+
+           <input
+    type="url"
+    id="imagem"
+    placeholder="Cole aqui o link da imagem"
+>
+<div id="previewImagem" style="margin-top:15px; display:none;">
+    <p><strong>Pré-visualização:</strong></p>
+    <img
+        id="imagemPreview"
+        src=""
+        alt="Pré-visualização da imagem"
+        style="max-width:350px; width:100%; border-radius:10px; margin-top:8px;"
+    >
+</div>
+
+            <div class="botoes">
+
+                <button
+    class="publicar"
+    id="botaoPublicar"
+    onclick="publicarNoticia()"
+>
+    PUBLICAR NOTÍCIA
+</button>
+
+
+                <a
+                    href="admin.html"
+                    class="voltar"
+                >
+                    VOLTAR
+                </a>
+
+            </div>
+
+
+            <div
+                class="mensagem"
+                id="mensagem"
+            >
+                ✅ Notícia preenchida com sucesso!
+            </div>
+
+        </div>
+
+    </main>
+
+
+   <script type="module">
+    import { db, auth } from "./firebase-config.js";
+
+import {
+    collection,
+    addDoc,
+    serverTimestamp,
+    doc,
+    getDoc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+const parametros = new URLSearchParams(window.location.search);
+const idEdicao = parametros.get("editar");
+
+async function carregarNoticiaParaEditar() {
+
+    if (!idEdicao) {
+        return;
+    }
+
+    try {
+        const referencia = doc(db, "noticias", idEdicao);
+        const resultado = await getDoc(referencia);
+
+        if (resultado.exists()) {
+            const noticia = resultado.data();
+
+            document.getElementById("titulo").value =
+                noticia.titulo || "";
+
+            document.getElementById("texto").value =
+                noticia.conteudo || "";
+                document.getElementById("imagem").value =
+    noticia.imagem || "";
+    if (noticia.imagem) {
+    imagemPreview.src = noticia.imagem;
+    previewImagem.style.display = "block";
+} else {
+    imagemPreview.src = "";
+    previewImagem.style.display = "none";
+}
+        }
+
+    } catch (erro) {
+        console.error("Erro ao carregar notícia:", erro);
+        alert("Não foi possível carregar a notícia para edição.");
+    }
+}
+
+carregarNoticiaParaEditar();
+const campoImagem = document.getElementById("imagem");
+const previewImagem = document.getElementById("previewImagem");
+const imagemPreview = document.getElementById("imagemPreview");
+
+campoImagem.addEventListener("input", function() {
+
+    const url = campoImagem.value.trim();
+
+    if (url === "") {
+        previewImagem.style.display = "none";
+        imagemPreview.src = "";
+        return;
+    }
+
+    imagemPreview.src = url;
+    previewImagem.style.display = "block";
+    imagemPreview.addEventListener("error", function() {
+    previewImagem.style.display = "none";
+    alert("Não foi possível carregar a imagem. Verifique o link.");
+});
+});
+    async function publicarNoticia() {
+
+    const titulo =
+        document.getElementById("titulo").value.trim();
+
+    const texto =
+        document.getElementById("texto").value.trim();
+const imagem =
+    document.getElementById("imagem").value.trim();
+    if (titulo === "" || texto === "") {
+        alert("Preencha o título e o texto da notícia.");
+        return;
+    }
+
+    try {
+
+       if (idEdicao) {
+
+    const referencia = doc(db, "noticias", idEdicao);
+
+    await updateDoc(referencia, {
+    titulo: titulo,
+    conteudo: texto,
+    imagem: imagem
+});
+
+    alert("Notícia atualizada com sucesso!");
+
+    window.location.href = "lista-noticias.html";
+
+    return;
+
+} else {
+
+    await addDoc(collection(db, "noticias"), {
+        titulo: titulo,
+        conteudo: texto,
+        imagem: imagem,
+        data: serverTimestamp()
+    });
+
+    alert("Notícia publicada com sucesso!");
+}
+
+        document.getElementById("titulo").value = "";
+        document.getElementById("texto").value = "";
+        document.getElementById("imagem").value = "";
+
+    } catch (erro) {
+
+        console.error("Erro ao publicar:", erro);
+        alert("Não foi possível publicar a notícia.");
+
+    }
+    }
+
+window.publicarNoticia = publicarNoticia;
+
+    function verificarEdicao() {
+
+        const dados =
+            JSON.parse(localStorage.getItem("noticiaEditando"));
+
+
+        if (!dados) {
+
+            return;
+
+        }
+
+
+        document.getElementById("titulo").value =
+            dados.noticia.titulo;
+
+
+        document.getElementById("texto").value =
+            dados.noticia.texto;
+
+
+        const botao =
+            document.getElementById("botaoPublicar");
+
+
+        botao.textContent = "SALVAR ALTERAÇÕES";
+
+
+        botao.onclick = function() {
+
+            salvarEdicao(dados.indice);
+
+        };
+
+    }
+
+
+
+    function salvarEdicao(indice) {
+
+        const titulo =
+            document.getElementById("titulo").value.trim();
+
+        const texto =
+            document.getElementById("texto").value.trim();
+
+
+        if (titulo === "" || texto === "") {
+
+            alert("Preencha o título e o texto da notícia.");
+
+            return;
+
+        }
+
+
+        let noticias =
+            JSON.parse(localStorage.getItem("noticias")) || [];
+
+
+        noticias[indice].titulo = titulo;
+
+        noticias[indice].texto = texto;
+
+
+        localStorage.setItem(
+            "noticias",
+            JSON.stringify(noticias)
+        );
+
+
+        localStorage.removeItem("noticiaEditando");
+
+
+        alert("Notícia atualizada com sucesso!");
+
+
+        window.location.href = "lista-noticias.html";
+
+    }
+
+
+
+    window.onload = function() {
+
+        verificarEdicao();
+
+    };
+
+</script>
+
+</body>
+
+</html>

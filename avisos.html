@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gerenciar Avisos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f4f7;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 140px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #0057b8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-left: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📢 Gerenciar Avisos</h1>
+</header>
+
+<main>
+
+    <label for="tituloAviso">Título do aviso</label>
+
+    <input
+        type="text"
+        id="tituloAviso"
+        placeholder="Ex.: Reunião de Pais"
+    >
+
+    <label for="textoAviso">Aviso</label>
+
+    <textarea
+        id="textoAviso"
+        placeholder="Digite aqui o aviso"
+    ></textarea>
+
+    <button id="salvarAviso">
+        SALVAR AVISO
+    </button>
+
+    <a href="admin.html" class="voltar">
+        Voltar
+    </a>
+
+</main>
+<script type="module">
+
+    import { db, auth } from "./firebase-config.js";
+
+   import {
+    collection,
+    addDoc,
+    serverTimestamp,
+    doc,
+    getDoc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    import {
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    const parametros = new URLSearchParams(window.location.search);
+const idEdicao = parametros.get("editar");
+async function carregarAvisoParaEditar() {
+
+    if (!idEdicao) {
+        return;
+    }
+
+    try {
+
+        const referencia = doc(db, "avisos", idEdicao);
+        const resultado = await getDoc(referencia);
+
+        if (resultado.exists()) {
+
+            const aviso = resultado.data();
+
+            document.getElementById("tituloAviso").value =
+                aviso.titulo || "";
+
+            document.getElementById("textoAviso").value =
+                aviso.texto || "";
+
+            document.getElementById("salvarAviso").textContent =
+                "SALVAR ALTERAÇÕES";
+        }
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar aviso:", erro);
+
+        alert("Não foi possível carregar o aviso.");
+
+    }
+}
+onAuthStateChanged(auth, function(usuario) {
+
+    if (!usuario) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    carregarAvisoParaEditar();
+
+});
+document
+    .getElementById("salvarAviso")
+    .addEventListener("click", async function() {
+
+        const titulo =
+            document.getElementById("tituloAviso").value.trim();
+
+        const texto =
+            document.getElementById("textoAviso").value.trim();
+
+        if (titulo === "" || texto === "") {
+
+            alert("Preencha o título e o aviso.");
+
+            return;
+        }
+
+       try {
+
+    if (idEdicao) {
+
+        const referencia = doc(db, "avisos", idEdicao);
+
+        await updateDoc(referencia, {
+            titulo: titulo,
+            texto: texto
+        });
+
+        alert("Aviso atualizado com sucesso!");
+
+    } else {
+
+        await addDoc(collection(db, "avisos"), {
+            titulo: titulo,
+            texto: texto,
+            data: serverTimestamp()
+        });
+
+        alert("Aviso salvo com sucesso!");
+    }
+
+            document.getElementById("tituloAviso").value = "";
+            document.getElementById("textoAviso").value = "";
+
+        } catch (erro) {
+
+            console.error("Erro ao salvar aviso:", erro);
+
+            alert("Não foi possível salvar o aviso.");
+
+        }
+
+    });
+</script>
+</body>
+</html>

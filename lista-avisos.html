@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Avisos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f4f7;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .botao {
+            background: #0057b8;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .aviso {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            margin-top: 12px;
+            margin-right: 5px;
+            padding: 7px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📢 Avisos</h1>
+</header>
+
+<main>
+
+    <div class="topo">
+
+        <h2>Avisos cadastrados</h2>
+
+        <div>
+            <a href="admin.html" class="botao">
+                ← Voltar ao painel
+            </a>
+
+            <a href="avisos.html" class="botao">
+                + Novo aviso
+            </a>
+        </div>
+
+    </div>
+
+    <div id="listaAvisos"></div>
+
+</main>
+
+<script type="module">
+
+    import { db, auth } from "./firebase-config.js";
+
+import {
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    import {
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+
+    async function carregarAvisos() {
+
+        const lista =
+            document.getElementById("listaAvisos");
+
+        lista.innerHTML = "<p>Carregando avisos...</p>";
+
+        try {
+
+            const consulta = query(
+                collection(db, "avisos"),
+                orderBy("data", "desc")
+            );
+
+            const resultado = await getDocs(consulta);
+
+            lista.innerHTML = "";
+
+            if (resultado.empty) {
+                lista.innerHTML =
+                    "<p>Nenhum aviso cadastrado.</p>";
+                return;
+            }
+
+            resultado.forEach((documento) => {
+
+                const aviso = documento.data();
+
+                const bloco =
+                    document.createElement("div");
+
+                bloco.className = "aviso";
+
+                bloco.innerHTML = `
+                    <h3>📢 ${aviso.titulo || ""}</h3>
+
+                    ${aviso.data ? `
+                        <small>
+                            📅 ${aviso.data.toDate().toLocaleDateString("pt-BR")}
+                        </small>
+                    ` : ""}
+
+                    <p>
+                        ${aviso.texto || ""}
+                    </p>
+
+                    <button onclick="editarAviso('${documento.id}')">
+    ✏️ Editar
+</button>
+
+                   <button onclick="excluirAviso('${documento.id}')">
+    🗑️ Excluir
+</button>
+                `;
+
+                lista.appendChild(bloco);
+
+            });
+
+        } catch (erro) {
+
+            console.error("Erro ao carregar avisos:", erro);
+
+            lista.innerHTML =
+                "<p>Não foi possível carregar os avisos.</p>";
+        }
+    }
+    function editarAviso(id) {
+
+    window.location.href =
+        "avisos.html?editar=" + id;
+
+}
+
+window.editarAviso = editarAviso;
+async function excluirAviso(id) {
+
+    const confirmar =
+        confirm("Deseja realmente excluir este aviso?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        await deleteDoc(
+            doc(db, "avisos", id)
+        );
+
+        alert("Aviso excluído com sucesso!");
+
+        carregarAvisos();
+
+    } catch (erro) {
+
+        console.error("Erro ao excluir aviso:", erro);
+
+        alert("Não foi possível excluir o aviso.");
+
+    }
+}
+
+window.excluirAviso = excluirAviso;
+
+    onAuthStateChanged(auth, function(usuario) {
+
+        if (!usuario) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        carregarAvisos();
+
+    });
+
+</script>
+
+</body>
+</html>

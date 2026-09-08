@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - Painel Administrativo</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0047AB, #32CD32);
+        }
+
+        .caixa-login {
+            background: white;
+            width: 90%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #0047AB;
+        }
+
+        .escola {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #0047AB;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #mensagem {
+            margin-top: 20px;
+            text-align: center;
+            color: red;
+        }
+
+        .voltar {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #555;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="caixa-login">
+
+        <h1>🔐 Área Administrativa</h1>
+
+        <p class="escola">
+            Escola Estadual Professora Sandra Regina Pires
+        </p>
+
+        <label for="email">E-mail</label>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Digite seu e-mail"
+        >
+
+        <label for="senha">Senha</label>
+
+        <input
+            type="password"
+            id="senha"
+            placeholder="Digite sua senha"
+        >
+
+        <button id="entrar">
+            ENTRAR
+        </button>
+
+        <div id="mensagem"></div>
+
+        <a href="index.html" class="voltar">
+            ← Voltar ao site
+        </a>
+
+    </div>
+
+
+    <script type="module">
+
+        import { auth } from "./firebase-config.js";
+
+        import {
+            signInWithEmailAndPassword
+        } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+
+        const botao = document.getElementById("entrar");
+
+
+        botao.addEventListener("click", fazerLogin);
+
+
+        async function fazerLogin() {
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const senha =
+                document.getElementById("senha").value;
+
+            const mensagem =
+                document.getElementById("mensagem");
+
+
+            if (email === "" || senha === "") {
+
+                mensagem.textContent =
+                    "Preencha o e-mail e a senha.";
+
+                return;
+            }
+
+
+            mensagem.textContent = "Entrando...";
+
+
+            try {
+
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    senha
+                );
+
+                mensagem.style.color = "green";
+
+                mensagem.textContent =
+                    "Login realizado com sucesso!";
+
+
+                setTimeout(function() {
+
+                    window.location.href = "admin.html";
+
+                }, 800);
+
+            }
+
+            catch (erro) {
+
+                console.error(erro);
+
+                mensagem.style.color = "red";
+
+                mensagem.textContent =
+                    "E-mail ou senha incorretos.";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

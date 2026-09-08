@@ -138,80 +138,263 @@ footer{
 
     <div class="cards">
 
-        <div class="card">
-            <h3>📚 Ensino de Qualidade</h3> <br>
-            <p>Escola comemora bons resultados no IDEB 2025 📚🏆</p> <br>
-             <p>A escola celebrou os resultados do IDEB 2025, alcançando nota 6,6 nos Anos Finais do Ensino Fundamental e 5,3 no Ensino Médio. Os índices refletem o compromisso de estudantes, professores, gestores e famílias com a qualidade da educação. A conquista reforça o trabalho coletivo da comunidade escolar e o empenho contínuo na busca pela excelência no ensino.</p>  <br>
-        </div>
 
                 <div class="card">
             <h3>📅 Calendário Escolar</h3> <br>
-            <p>07/09 - Feriado Nacional</p>
-            <p>08/09 a 18/09 - Provas Bimestrais</p>
-            <p>21/09 a 28/09 - Prova Paulista</p>
-            <p>21/09 a 25/09 - Semana de avaliações (ALURA)</p>
-            <p>01/10 - Feriado Municipal</p>
-            <p>02/10 - Prédio requisitado para eleições</p>
-            <p>05/10 - Início do 4° Bimestre</p>
-            <p>12/10 - Feriado Nacional</p>
-            <p>15/10 - Dia dos Professores</p> 
-            <p>16/10 - Conselho de Classe</p>
-            <p>19/10 a 23/10 - Semana de avaliações (ALURA)</p>
-            <p>23/10 - Reunião de Pais</p>
-            <p>28/10 - Dia do Funcionário Público</p>
-            <p>29/10 e 30/10 - Saresp - 9° ano EF</p>
-            <p>02/11 - Feriado Nacional</p>
-            <p>04/11 e 05/11 - Aulas On-line</p>
-            <p>04/11 e 05/11 - Provão Paulista - 3° Série EM</p>
-            <p>06/11 - Saresp Itinerários - 3° Série EM</p>
-            <p>09/11 - Saresp Itinerários - 2° Série EM</p>
-            <p>10/11 e 13/11 - Aulas On-line</p>
-            <p>10/11 e 11/11 - Provão Paulista - 2° Série EM</p>
-            <p>12/11 e 13/11 - Provão Paulista - 1° Série EM</p>
-            <p>18/11 e 19/11 - Saresp - 6° ano EF</p>
-            <p>23/11 a 27/11 - Semana de avaliações (ALURA)</p>
-            <p>26/11 e 27/11 - Saresp - 7° ano EF</p>
-            <p>30/11 e 01/12 - Saresp - 8° ano EF</p>
-            <p>07/12 e 09/12 - Recuperação</p>
-            <p>16/12 e 17/12 - Conselho de Classe</p>
-            <p>18/12 - Avaliação Final</p>
-            <p>19/12 - Formatura</p>
+            <div id="calendarioFirebase"></div>
     
         </div>
                  <div class="card">
-            <h3>📞 Contatos</h3>      
-            <br><p>Telefone: (15) 3573-1110</p><br>
-            <p>WhatsApp: (15) 3573-1173</p><br>
-            <p>E-mail: e015581a@educacao.sp.gov.br</p><br>
-            <p>Instagram: @escolasandrarp</p><br>
-            <p>Endereço: AVENIDA BRASILIA, 825 - RUA. CENTRO. 18490001 Barão de Antonina - São Paulo</p><br>
-            <p>Código INEP: 35015581</p><br>
-            <h3>Gestores</h3><br>
-            <p>Diretora: Marcia Aparecida Sota</p><br>
-            <p>Vice-Diretor: Aldo José de Andrade</p>
-        
+            <h3>🏫 Informações da Escola</h3>
+            <div id="informacoesFirebase"></div>     
          </div>
-                <div class="card">
-            <h3>📰 Notícias</h3><br>
-            <p>Aluno Arthur José de Camargo Rodrigues conquista medalha de bronze na 3ª fase da OMASP.</p>
-            <img src="Arthur.jpeg" width="230" height="120"><br>
+
+             <div class="card">
+
+    <h3>📰 Notícias</h3>
+
+    <div id="noticiasSite"></div>
+
+</div>
             
-            <br><p>💎 SAEB 2025</p><br>
-            <p>A E.E. Profª Sandra Regina Pires conquistou a classificação Diamante no SAEB 2025, reconhecendo o excelente desempenho dos estudantes e o compromisso de toda a comunidade escolar com a qualidade da educação. A conquista reforça a dedicação de alunos, professores, gestores e famílias na busca pela excelência no ensino. 🏆📚✨</p>
+<div class="card">
+    <h3>📢 Avisos</h3>
 
+    <div id="avisosFirebase"></div>
+</div>
 </section>
-
-
-</body>
-</html>
-
-    </div>
-</section>
-
+  
 <footer>
     <p><strong>E.E. Profª Sandra Regina Pires</strong></p>
     <p>© 2026 Todos os direitos reservados</p>
 </footer>
+<script type="module">
+    import { db } from "./firebase-config.js";
 
+import {
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    async function carregarNoticias() {
+
+        const areaNoticias = document.getElementById("noticiasSite");
+
+        try {
+
+            const consulta = query(
+                collection(db, "noticias"),
+                orderBy("data", "desc")
+            );
+
+            const resultado = await getDocs(consulta);
+
+            areaNoticias.innerHTML = "";
+
+            resultado.forEach((documento) => {
+
+                const noticia = documento.data();
+
+                const bloco = document.createElement("div");
+bloco.style.padding = "15px 0";
+bloco.style.borderBottom = "1px solid rgba(0,0,0,0.15)";
+                bloco.innerHTML = `
+    <h4>${noticia.titulo || ""}</h4>
+${noticia.data ? `
+    <small>
+        📅 ${noticia.data.toDate().toLocaleDateString("pt-BR")}
+    </small>
+` : ""}
+    ${noticia.imagem ? `
+        <img
+            src="${noticia.imagem}"
+            alt="${noticia.titulo || "Imagem da notícia"}"
+            style="
+                width:100%;
+                max-width:350px;
+                height:auto;
+                margin:12px 0;
+                border-radius:8px;
+            "
+        >
+    ` : ""}
+
+    <p>${noticia.conteudo || ""}</p>
+    <br>
+`;
+
+                areaNoticias.appendChild(bloco);
+
+            });
+
+        } catch (erro) {
+
+            console.error("Erro ao carregar notícias:", erro);
+
+            areaNoticias.innerHTML =
+                "<p>Não foi possível carregar as notícias.</p>";
+        }
+    }
+async function carregarCalendario() {
+
+    const areaCalendario =
+        document.getElementById("calendarioFirebase");
+
+    try {
+
+        const consulta = query(
+            collection(db, "calendario"),
+            orderBy("data", "asc")
+        );
+
+        const resultado = await getDocs(consulta);
+
+        areaCalendario.innerHTML = "";
+
+        resultado.forEach((documento) => {
+
+            const evento = documento.data();
+
+            const bloco = document.createElement("p");
+
+           const dataFormatada =
+    evento.data.split("-").reverse().join("/");
+
+const dataFimFormatada =
+    evento.dataFim
+        ? evento.dataFim.split("-").reverse().join("/")
+        : "";
+
+bloco.textContent =
+    dataFormatada +
+    (dataFimFormatada ? " a " + dataFimFormatada : "") +
+    " - " +
+    evento.titulo;
+
+            areaCalendario.appendChild(bloco);
+
+        });
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar calendário:", erro);
+
+        areaCalendario.innerHTML =
+            "<p>Não foi possível carregar o calendário.</p>";
+    }
+}
+async function carregarAvisos() {
+
+    const areaAvisos =
+        document.getElementById("avisosFirebase");
+
+    try {
+
+        const consulta = query(
+            collection(db, "avisos"),
+            orderBy("data", "desc")
+        );
+
+        const resultado = await getDocs(consulta);
+
+        areaAvisos.innerHTML = "";
+
+        if (resultado.empty) {
+            areaAvisos.innerHTML =
+                "<p>Nenhum aviso no momento.</p>";
+            return;
+        }
+
+        resultado.forEach((documento) => {
+
+            const aviso = documento.data();
+
+            const bloco =
+                document.createElement("div");
+
+            bloco.style.padding = "12px 0";
+            bloco.style.borderBottom =
+                "1px solid rgba(0,0,0,0.15)";
+
+            bloco.innerHTML = `
+                <h4>${aviso.titulo || ""}</h4>
+
+                ${aviso.data ? `
+                    <small>
+                        📅 ${aviso.data.toDate().toLocaleDateString("pt-BR")}
+                    </small>
+                ` : ""}
+
+                <p>${aviso.texto || ""}</p>
+            `;
+
+            areaAvisos.appendChild(bloco);
+
+        });
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar avisos:", erro);
+
+        areaAvisos.innerHTML =
+            "<p>Não foi possível carregar os avisos.</p>";
+    }
+}
+async function carregarInformacoesEscola() {
+
+    const areaInformacoes =
+        document.getElementById("informacoesFirebase");
+
+    try {
+
+        const referencia =
+            doc(db, "configuracoes", "escola");
+
+        const resultado =
+            await getDoc(referencia);
+
+        if (!resultado.exists()) {
+            areaInformacoes.innerHTML =
+                "<p>Informações ainda não cadastradas.</p>";
+            return;
+        }
+
+        const dados = resultado.data();
+
+        areaInformacoes.innerHTML = `
+            <p><strong>Telefone:</strong> ${dados.telefone || ""}</p>
+            <p><strong>WhatsApp:</strong> ${dados.whatsapp || ""}</p>
+            <p><strong>E-mail:</strong> ${dados.email || ""}</p>
+            <p><strong>Instagram:</strong> ${dados.instagram || ""}</p>
+            <p><strong>Endereço:</strong> ${dados.endereco || ""}</p>
+            <p><strong>Código INEP:</strong> ${dados.inep || ""}</p>
+            <p><strong>Diretora:</strong> ${dados.diretora || ""}</p>
+            <p><strong>Vice-Diretor:</strong> ${dados.viceDiretor || ""}</p>
+            <p><strong>Coordenadora:</strong> ${dados.coordenadora || ""}</p>
+<p><strong>Horário:</strong> ${dados.horario || ""}</p>
+
+${dados.informacoesExtras ? `
+    <h3>Informações Extras</h3>
+    <p>${dados.informacoesExtras}</p>
+` : ""}
+        `;
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar informações:", erro);
+
+        areaInformacoes.innerHTML =
+            "<p>Não foi possível carregar as informações da escola.</p>";
+    }
+}
+carregarCalendario();
+    carregarNoticias();
+    carregarAvisos();
+    carregarInformacoesEscola();
+</script>
 </body>
 </html>

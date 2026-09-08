@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gerenciar Calendário</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f2f4f7;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #0057b8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-left: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>📅 Gerenciar Calendário Escolar</h1>
+</header>
+
+<main>
+
+   <label for="dataEvento">Data do evento</label>
+
+<input
+    type="date"
+    id="dataEvento"
+>
+
+<label for="dataFim">Data final (opcional)</label>
+
+<input
+    type="date"
+    id="dataFim"
+>
+
+<label for="tituloEvento">Evento</label>
+
+    <input
+        type="text"
+        id="tituloEvento"
+        placeholder="Ex.: Reunião de Pais"
+    >
+
+    <label for="descricaoEvento">Descrição</label>
+
+    <textarea
+        id="descricaoEvento"
+        placeholder="Informações adicionais do evento"
+    ></textarea>
+
+    <button id="salvarEvento">
+        SALVAR EVENTO
+    </button>
+
+    <a href="admin.html" class="voltar">
+        Voltar
+    </a>
+
+</main>
+
+<script type="module">
+
+    import { db, auth } from "./firebase-config.js";
+
+   import {
+    collection,
+    addDoc,
+    serverTimestamp,
+    doc,
+    getDoc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+   import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+const parametros = new URLSearchParams(window.location.search);
+const idEdicao = parametros.get("editar");
+
+async function carregarEventoParaEditar() {
+
+    if (!idEdicao) {
+        return;
+    }
+
+    try {
+
+        const referencia = doc(db, "calendario", idEdicao);
+        const resultado = await getDoc(referencia);
+
+        if (resultado.exists()) {
+
+            const evento = resultado.data();
+
+            document.getElementById("dataEvento").value =
+                evento.data || "";
+
+            document.getElementById("dataFim").value =
+    evento.dataFim || "";
+
+            document.getElementById("tituloEvento").value =
+                evento.titulo || "";
+
+            document.getElementById("descricaoEvento").value =
+                evento.descricao || "";
+
+            document.getElementById("salvarEvento").textContent =
+                "SALVAR ALTERAÇÕES";
+        }
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar evento:", erro);
+
+        alert("Não foi possível carregar o evento.");
+
+    }
+}
+   onAuthStateChanged(auth, function(usuario) {
+
+    if (!usuario) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    carregarEventoParaEditar();
+
+});
+
+
+    document
+        .getElementById("salvarEvento")
+        .addEventListener("click", async function() {
+
+            const data =
+                document.getElementById("dataEvento").value;
+
+            const dataFim =
+    document.getElementById("dataFim").value;
+
+            const titulo =
+                document.getElementById("tituloEvento").value.trim();
+
+            const descricao =
+                document.getElementById("descricaoEvento").value.trim();
+
+
+            if (data === "" || titulo === "") {
+
+                alert("Preencha a data e o nome do evento.");
+
+                return;
+            }
+
+
+           try {
+
+    if (idEdicao) {
+
+        const referencia = doc(db, "calendario", idEdicao);
+
+        await updateDoc(referencia, {
+            data: data,
+            dataFim: dataFim,
+            titulo: titulo,
+            descricao: descricao
+        });
+
+        alert("Evento atualizado com sucesso!");
+
+    } else {
+
+        await addDoc(collection(db, "calendario"), {
+            data: data,
+            dataFim: dataFim,
+            titulo: titulo,
+            descricao: descricao,
+            criadoEm: serverTimestamp()
+        });
+
+        alert("Evento salvo com sucesso!");
+    }
+
+                document.getElementById("dataEvento").value = "";
+                document.getElementById("dataFim").value = "";
+                document.getElementById("tituloEvento").value = "";
+                document.getElementById("descricaoEvento").value = "";
+                window.location.href = "lista-calendario.html";
+
+            } catch (erro) {
+
+                console.error("Erro ao salvar evento:", erro);
+
+                alert("Não foi possível salvar o evento.");
+
+            }
+
+        });
+
+</script>
+
+</body>
+</html>

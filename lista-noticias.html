@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Notícias da Escola</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f2f4f7;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0047AB, #32CD32);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+
+        .topo h2 {
+            color: #0047AB;
+        }
+
+        .botao {
+            background-color: #0047AB;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .botao:hover {
+            background-color: #003580;
+        }
+
+        .noticia {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+        }
+
+        .noticia h3 {
+            color: #0047AB;
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+
+        .data {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .texto {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .vazio {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px;
+            color: #666;
+        }
+
+.editar {
+    margin-top: 20px;
+    margin-right: 10px;
+    background-color: #0047AB;
+    color: white;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.editar:hover {
+    background-color: #003580;
+}
+        .excluir {
+            margin-top: 20px;
+            background-color: #c62828;
+            color: white;
+            border: none;
+            padding: 9px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .excluir:hover {
+            background-color: #9b1c1c;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>📰 Notícias da Escola</h1>
+
+        <p>
+            Escola Estadual Professora Sandra Regina Pires
+        </p>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="topo">
+
+            <h2>Notícias publicadas</h2>
+
+            <a href="noticias.html" class="botao">
+                + Nova notícia
+            </a>
+
+        </div>
+
+
+        <div id="listaNoticias"></div>
+
+    </main>
+
+
+    <script type="module">
+        import { db, auth } from "./firebase-config.js";
+
+import {
+    collection,
+    getDocs,
+    deleteDoc,
+    doc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+       async function carregarNoticias() {
+
+    const lista = document.getElementById("listaNoticias");
+
+    lista.innerHTML = "<p>Carregando notícias...</p>";
+
+    try {
+
+        const consulta = query(
+            collection(db, "noticias"),
+            orderBy("data", "desc")
+        );
+
+        const resultado = await getDocs(consulta);
+
+        lista.innerHTML = "";
+
+        if (resultado.empty) {
+            lista.innerHTML = "<p>Nenhuma notícia publicada.</p>";
+            return;
+        }
+
+        resultado.forEach((documento) => {
+
+            const noticia = documento.data();
+
+            const bloco = document.createElement("div");
+
+            bloco.style.background = "white";
+            bloco.style.padding = "20px";
+            bloco.style.marginBottom = "15px";
+            bloco.style.borderRadius = "10px";
+
+            bloco.innerHTML = `
+                <h3>${noticia.titulo || ""}</h3>
+                ${noticia.data ? `
+    <small style="display:block; margin:6px 0 10px 0;">
+        📅 ${noticia.data.toDate().toLocaleDateString("pt-BR")}
+    </small>
+` : ""}
+${noticia.imagem ? `
+    <img
+        src="${noticia.imagem}"
+        alt="${noticia.titulo || "Imagem da notícia"}"
+        style="
+            width:100%;
+            max-width:300px;
+            height:auto;
+            margin:12px 0;
+            border-radius:8px;
+        "
+    >
+` : ""}
+                <p style="margin-top:10px;">
+                    ${noticia.conteudo || ""}
+                </p>
+
+                <br>
+<button
+    onclick="editarNoticia('${documento.id}')">
+    ✏️ Editar
+</button>
+                <button
+                    onclick="excluirNoticia('${documento.id}')">
+                    🗑️ Excluir
+                </button>
+            `;
+
+            lista.appendChild(bloco);
+        });
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar notícias:", erro);
+
+        lista.innerHTML =
+            "<p>Não foi possível carregar as notícias.</p>";
+    }
+}
+
+function editarNoticia(id) {
+    window.location.href = "noticias.html?editar=" + id;
+}
+
+window.editarNoticia = editarNoticia;
+async function excluirNoticia(id) {
+
+    const confirmar =
+        confirm("Deseja realmente excluir esta notícia?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        await deleteDoc(doc(db, "noticias", id));
+
+        alert("Notícia excluída com sucesso!");
+
+        carregarNoticias();
+
+    } catch (erro) {
+
+        console.error("Erro ao excluir:", erro);
+
+        alert("Não foi possível excluir a notícia.");
+    }
+}
+
+
+window.excluirNoticia = excluirNoticia;
+
+
+onAuthStateChanged(auth, function(usuario) {
+
+    if (!usuario) {
+
+        window.location.href = "login.html";
+
+        return;
+    }
+
+    carregarNoticias();
+});
+</script>
+</body>
+</html>
