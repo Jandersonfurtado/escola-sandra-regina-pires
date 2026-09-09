@@ -98,6 +98,23 @@ footer{
     margin-top:40px;
 }
 
+.botao-login{
+    display:inline-block;
+    margin-top:15px;
+    padding:10px 18px;
+    background:#002855;
+    color:#ffffff;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+    transition:0.2s;
+}
+
+.botao-login:hover{
+    background:#0047AB;
+    transform:translateY(-1px);
+}
+
 </style>
 </head>
 <body>
@@ -167,6 +184,8 @@ footer{
 <footer>
     <p><strong>E.E. Profª Sandra Regina Pires</strong></p>
     <p>© 2026 Todos os direitos reservados</p>
+
+    <a href="login.html" class="botao-login">🔐 Área Administrativa</a>
 </footer>
 <script type="module">
     import { db } from "./firebase-config.js";
@@ -398,3 +417,4 @@ carregarCalendario();
 </script>
 </body>
 </html>
+       
